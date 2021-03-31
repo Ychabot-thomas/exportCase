@@ -1,0 +1,81 @@
+<h2 class="title">Please Select Frame</h2>
+<select name="selectCase" id="selectCase" class="select">
+  <option value="" disabled selected="selected">Select Case</option>
+  <option value="all">All Case</option>
+</select>
+<div class="containerButton">
+  <button class="button" id="export">Export JSON</button>
+  <button class="button" id="cancel">Cancel</button>
+</div>
+
+<style>
+  .title {
+    text-transform: uppercase;
+    font-weight: 300;
+    text-align: center;
+  }
+
+  .select {
+    border: none;
+    position: relative;
+    left: 50%;
+    transform: translateX(-50%);
+    margin-top: 20px;
+  }
+
+  .containerButton {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 40px;
+  }
+
+  .button {
+    padding: 10px;
+    background-color: blue;
+    color: white;
+    border: solid 1px blue;
+    border-radius: 10px;
+    border-style: none;
+  }
+</style>
+
+<script type="module">
+  import fileSaver from "https://cdn.skypack.dev/file-saver";
+
+  let recupCase = [];
+  onmessage = (event) => {
+    recupCase = event.data.pluginMessage;
+    const select = document.getElementById("selectCase");
+    for (let i = 0; i < recupCase.length; i++) {
+      const option = document.createElement("option");
+      option.value = i;
+      option.text = recupCase[i].name;
+      select.appendChild(option);
+    }
+  };
+
+  let idSelect = null;
+  const selectElmt = document.getElementById("selectCase");
+  selectElmt.addEventListener("change", (event) => {
+    idSelect = event.target.value;
+  });
+
+  document.getElementById("export").onclick = () => {
+    let blob = "";
+    if (idSelect === "all") {
+      blob = new Blob([JSON.stringify(recupCase)], {
+        type: "application/json",
+      });
+    } else {
+      blob = new Blob([JSON.stringify(recupCase[idSelect])], {
+        type: "application/json",
+      });
+    }
+    fileSaver.saveAs(blob, "data.json");
+    parent.postMessage({ pluginMessage: { type: "export" } }, "*");
+  };
+
+  document.getElementById("cancel").onclick = () => {
+    parent.postMessage({ pluginMessage: { type: "cancel" } }, "*");
+  };
+</script>
