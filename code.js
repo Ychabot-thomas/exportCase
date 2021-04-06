@@ -19,6 +19,7 @@ let afficheCase = recupCase.map((cases, i) => {
         childRotation: childrenCase.rotation,
         childFills: childrenCase.fills,
         // Text //
+        childContent: childrenCase.characters ? childrenCase.characters : "",
         childFontName: childrenCase.fontName ? childrenCase.fontName : "",
         childFontSize: childrenCase.fontSize ? childrenCase.fontSize : "",
         childTextDecoration: childrenCase.textDecoration
