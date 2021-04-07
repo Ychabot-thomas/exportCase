@@ -42,15 +42,33 @@
 <script type="module">
   import fileSaver from "https://cdn.skypack.dev/file-saver";
 
-  let recupCase = [];
+  let nameStrip = [];
+  let dataExport = [];
+
   onmessage = (event) => {
-    recupCase = event.data.pluginMessage;
-    const select = document.getElementById("selectCase");
-    for (let i = 0; i < recupCase.length; i++) {
-      const option = document.createElement("option");
-      option.value = i;
-      option.text = recupCase[i].name;
-      select.appendChild(option);
+    const { pluginMessage } = event.data;
+
+    // Start Plugin
+    if (pluginMessage.message === "recupStrip") {
+      nameStrip = pluginMessage.data;
+      const select = document.getElementById("selectCase");
+      for (let i = 0; i < nameStrip.length; i++) {
+        const option = document.createElement("option");
+        option.value = nameStrip[i].id;
+        option.text = nameStrip[i].name;
+        select.appendChild(option);
+      }
+    }
+
+    // Recup data Sequence Select
+    if (pluginMessage.message === "exportJSON") {
+      let blob = "";
+      dataExport = pluginMessage.data;
+      blob = new Blob([JSON.stringify([dataExport])], {
+        type: "application/json",
+      });
+      fileSaver.saveAs(blob, "data.json");
+      parent.postMessage({ pluginMessage: { type: "closePlugin" } }, "*");
     }
   };
 
@@ -61,18 +79,10 @@
   });
 
   document.getElementById("export").onclick = () => {
-    let blob = "";
-    if (idSelect === "all") {
-      blob = new Blob([JSON.stringify(recupCase)], {
-        type: "application/json",
-      });
-    } else {
-      blob = new Blob([JSON.stringify(recupCase[idSelect])], {
-        type: "application/json",
-      });
-    }
-    fileSaver.saveAs(blob, "data.json");
-    parent.postMessage({ pluginMessage: { type: "export" } }, "*");
+    parent.postMessage(
+      { pluginMessage: { type: "export", data: idSelect } },
+      "*"
+    );
   };
 
   document.getElementById("cancel").onclick = () => {

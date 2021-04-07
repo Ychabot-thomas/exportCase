@@ -1,5 +1,11 @@
-let recupCase = figma.currentPage.children;
-let afficheCase = recupCase.map((cases, i) => {
+let getStrip = figma.currentPage.children.map((cases, i) => {
+  return {
+    id: cases.id,
+    name: cases.name,
+  };
+});
+
+let dataJSON = figma.currentPage.children.map((cases, i) => {
   return {
     id: cases.id,
     name: cases.name,
@@ -19,7 +25,7 @@ let afficheCase = recupCase.map((cases, i) => {
         childRotation: childrenCase.rotation,
         childFills: childrenCase.fills,
         // Text //
-        childContent: childrenCase.characters ? childrenCase.characters : "",
+        childContent: childrenCase.characters ? childrenCase.characters : null,
         childFontName: childrenCase.fontName ? childrenCase.fontName : "",
         childFontSize: childrenCase.fontSize ? childrenCase.fontSize : "",
         childTextDecoration: childrenCase.textDecoration
@@ -34,16 +40,31 @@ let afficheCase = recupCase.map((cases, i) => {
   };
 });
 
+let exportJSON = [];
+const recupData = (id) => {
+  let found = [];
+  if (id === "all") {
+    found = dataJSON;
+  } else {
+    found = dataJSON.find((element) => element.id === id);
+  }
+  return found;
+};
+
 figma.showUI(__html__);
 
-figma.ui.postMessage(afficheCase);
+figma.ui.postMessage({ message: "recupStrip", data: getStrip });
 
 figma.ui.onmessage = function (msg) {
   if (msg.type === "export") {
-    console.log("export");
-    figma.closePlugin("Export Finish");
-  } else {
-    console.log("cancel");
+    exportJSON = recupData(msg.data);
+    figma.ui.postMessage({ message: "exportJSON", data: exportJSON });
+  }
+  if (msg.type === "cancel") {
     figma.closePlugin("Cancel");
+  }
+
+  if (msg.type === "closePlugin") {
+    figma.closePlugin("Export Finish");
   }
 };
