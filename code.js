@@ -17,6 +17,11 @@ let dataJSON = figma.currentPage.children.map((cases, i) => {
       return {
         childId: childrenCase.id,
         childName: childrenCase.name,
+        type: childrenCase.fills
+          .map((fill) => {
+            return fill.type;
+          })
+          .toString(),
         childX: childrenCase.x,
         childY: childrenCase.y,
         childWidth: childrenCase.width,
